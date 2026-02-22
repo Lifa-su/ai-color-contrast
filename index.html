@@ -45,6 +45,34 @@ h1{text-align:center;font-size:clamp(1.5rem,4vw,2.2rem);margin:24px 0 8px;backgr
 .sb{font-size:.75rem;padding:3px 8px;border-radius:10px;background:rgba(46,213,115,.15);color:#2ed573;font-weight:600;white-space:nowrap}
 footer{text-align:center;color:#aab;font-size:.8rem;margin-top:40px;padding:20px 0;border-top:1px solid rgba(255,255,255,.05)}
 @media(max-width:560px){.row,.rg{grid-template-columns:1fr}}
+.pro-section{position:relative;margin-top:20px;margin-bottom:20px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+.pro-blur{filter:blur(5px);pointer-events:none;padding:24px;background:#16213e;opacity:.6}
+.pro-blur .pro-mock-row{display:flex;align-items:center;gap:12px;padding:10px;background:rgba(0,0,0,.2);border-radius:8px;margin-bottom:8px}
+.pro-blur .pro-mock-swatch{width:32px;height:32px;border-radius:6px;flex-shrink:0}
+.pro-blur .pro-mock-bar{height:12px;border-radius:4px;background:rgba(255,255,255,.1);flex:1}
+.pro-blur .pro-mock-badge{padding:4px 10px;border-radius:12px;font-size:.7rem;background:rgba(46,213,115,.15);color:#2ed573}
+.pro-blur .pro-mock-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:16px}
+.pro-blur .pro-mock-cell{aspect-ratio:1;border-radius:6px;background:rgba(255,255,255,.08)}
+.pro-blur .pro-mock-btn{margin-top:16px;padding:12px 24px;background:linear-gradient(135deg,#e94560,#533483);border:none;border-radius:10px;color:#fff;font-size:.9rem;width:100%}
+.pro-lock-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;z-index:2;background:rgba(26,26,46,.4);transition:background .2s}
+.pro-lock-overlay:hover{background:rgba(26,26,46,.3)}
+.pro-lock-icon{font-size:2.5rem;margin-bottom:8px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
+.pro-lock-text{font-size:.95rem;font-weight:600;color:#fff;background:linear-gradient(135deg,#e94560,#533483);padding:10px 24px;border-radius:24px;box-shadow:0 4px 15px rgba(233,69,96,.3);transition:transform .2s}
+.pro-lock-overlay:hover .pro-lock-text{transform:scale(1.05)}
+.pro-modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:1000;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+.pro-modal-overlay.show{display:flex}
+.pro-modal{background:#16213e;border-radius:16px;padding:32px;max-width:420px;width:90%;text-align:center;border:1px solid rgba(255,255,255,.1);animation:proPopIn .3s ease}
+@keyframes proPopIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.pro-modal h2{font-size:1.4rem;margin-bottom:4px;background:linear-gradient(135deg,#e94560,#533483);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pro-modal .pro-price{font-size:1.1rem;color:#aab;margin-bottom:16px}
+.pro-features{list-style:none;text-align:left;margin:16px 0;padding:0}
+.pro-features li{padding:8px 0;font-size:.9rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.05)}
+.pro-features li:last-child{border-bottom:none}
+.pro-features li span.pf-icon{font-size:1.1rem;flex-shrink:0}
+.pro-upgrade-btn{display:block;width:100%;padding:14px;background:linear-gradient(135deg,#e94560,#533483);border:none;border-radius:12px;color:#fff;font-size:1.05rem;font-weight:700;cursor:pointer;text-decoration:none;transition:all .2s;margin-top:16px;text-align:center}
+.pro-upgrade-btn:hover{transform:scale(1.02);box-shadow:0 4px 20px rgba(233,69,96,.4)}
+.pro-later-btn{background:none;border:none;color:#aab;cursor:pointer;margin-top:12px;font-size:.9rem;padding:8px}
+.pro-later-btn:hover{color:#fff}
 </style>
 </head>
 <body>
@@ -83,6 +111,38 @@ footer{text-align:center;color:#aab;font-size:.8rem;margin-top:40px;padding:20px
 <p style="font-size:.85rem;color:#aab;margin-bottom:8px">点击建议可直接应用</p>
 <div id="sgs" class="sg"></div>
 </div>
+<!-- Pro Section -->
+<div class="pro-section" onclick="openProModal()">
+<div class="pro-blur">
+<h2 style="font-size:1.1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px">🚀 Pro: Batch Check & PDF Export</h2>
+<div class="pro-mock-row"><div class="pro-mock-swatch" style="background:#FF6B6B"></div><div class="pro-mock-swatch" style="background:#1A1A2E"></div><div class="pro-mock-bar"></div><div class="pro-mock-badge">4.52:1 PASS</div></div>
+<div class="pro-mock-row"><div class="pro-mock-swatch" style="background:#4ECDC4"></div><div class="pro-mock-swatch" style="background:#FFFFFF"></div><div class="pro-mock-bar"></div><div class="pro-mock-badge">2.31:1 FAIL</div></div>
+<div class="pro-mock-row"><div class="pro-mock-swatch" style="background:#2C3E50"></div><div class="pro-mock-swatch" style="background:#ECF0F1"></div><div class="pro-mock-bar"></div><div class="pro-mock-badge">11.07:1 PASS</div></div>
+<h3 style="font-size:.9rem;margin-top:20px;color:#aab">Palette Combinations Matrix</h3>
+<div class="pro-mock-grid"><div class="pro-mock-cell" style="background:#FF6B6B"></div><div class="pro-mock-cell" style="background:#4ECDC4"></div><div class="pro-mock-cell" style="background:#45B7D1"></div><div class="pro-mock-cell" style="background:#96CEB4"></div><div class="pro-mock-cell" style="background:#FFEAA7"></div><div class="pro-mock-cell" style="background:#DDA0DD"></div><div class="pro-mock-cell" style="background:#98D8C8"></div><div class="pro-mock-cell" style="background:#F7DC6F"></div><div class="pro-mock-cell" style="background:#BB8FCE"></div><div class="pro-mock-cell" style="background:#85C1E9"></div></div>
+<div class="pro-mock-btn">📄 Export PDF Report</div>
+</div>
+<div class="pro-lock-overlay">
+<div class="pro-lock-icon">🔒</div>
+<div class="pro-lock-text">Unlock Pro Features</div>
+</div>
+</div>
+<!-- Pro Modal -->
+<div class="pro-modal-overlay" id="proModal" onclick="if(event.target===this)closeProModal()">
+<div class="pro-modal">
+<h2>🚀 Unlock Pro</h2>
+<p class="pro-price">One-time purchase · Lifetime access</p>
+<ul class="pro-features">
+<li><span class="pf-icon">📋</span> Batch check multiple color pairs at once</li>
+<li><span class="pf-icon">🎨</span> Full palette combination matrix</li>
+<li><span class="pf-icon">📄</span> Export detailed PDF accessibility reports</li>
+<li><span class="pf-icon">♾️</span> Lifetime updates & priority support</li>
+</ul>
+<a href="https://feifeicch.gumroad.com/l/ai-color-contrast" target="_blank" class="pro-upgrade-btn">Upgrade to Pro — $9</a>
+<button class="pro-later-btn" onclick="closeProModal()">Maybe later</button>
+</div>
+</div>
+<script>function openProModal(){document.getElementById('proModal').classList.add('show')}function closeProModal(){document.getElementById('proModal').classList.remove('show')}</script>
 <footer>Color Contrast Checker · WCAG 2.1 · Open Source Tool</footer>
 </div>
 <script>

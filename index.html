@@ -1,553 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>AI Color Contrast Checker - WCAG Compliance Tool</title>
-<meta name="description" content="Check color contrast ratios for WCAG compliance. Get AI-powered suggestions, color blindness simulation, and accessible palette generation.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Color Contrast Checker - WCAG 2.1</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg:#0a0a0f;--surface:#14141f;--surface2:#1e1e2e;--border:#2a2a3e;
---text:#e4e4ef;--text2:#9494a8;--accent:#7c5cfc;--accent2:#5c8cfc;
---success:#4cda8a;--warn:#fcb44c;--danger:#fc5c6c;
---radius:12px;--shadow:0 4px 24px rgba(0,0,0,0.3)
-}
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
-header{position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);background:rgba(10,10,15,0.85);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-header h1{font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap}
-header p{color:var(--text2);font-size:0.85rem;display:none}
-@media(min-width:640px){header p{display:block}}
-main{max-width:1200px;margin:0 auto;padding:24px 16px 80px}
-.grid{display:grid;gap:20px;grid-template-columns:1fr}
-@media(min-width:768px){.grid{grid-template-columns:1fr 1fr}}
-@media(min-width:1024px){.grid-3{grid-template-columns:1fr 1fr 1fr}}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);animation:fadeIn 0.4s ease}
-.card h2{font-size:1.1rem;font-weight:600;margin-bottom:16px;color:var(--text)}
-.card h3{font-size:0.95rem;font-weight:600;margin-bottom:12px;color:var(--text2)}
-@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-label{display:block;font-size:0.85rem;color:var(--text2);margin-bottom:6px;font-weight:500}
-input[type="text"],input[type="number"]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:0.95rem;font-family:inherit;outline:none;transition:border-color 0.2s}
-input[type="text"]:focus,input[type="number"]:focus{border-color:var(--accent)}
-input[type="color"]{width:48px;height:48px;border:2px solid var(--border);border-radius:8px;cursor:pointer;background:transparent;padding:2px}
-input[type="color"]::-webkit-color-swatch-wrapper{padding:0}
-input[type="color"]::-webkit-color-swatch{border:none;border-radius:6px}
-.color-input-group{display:flex;align-items:flex-end;gap:12px}
-.color-input-group .hex-input{flex:1}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border:none;border-radius:8px;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all 0.2s;color:#fff}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2))}
-.btn-primary:hover{opacity:0.9;transform:translateY(-1px)}
-.btn-sm{padding:6px 14px;font-size:0.8rem}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
-.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
-.ratio-display{text-align:center;padding:24px;margin:16px 0}
-.ratio-value{font-size:3.5rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2}
-.ratio-label{color:var(--text2);font-size:0.9rem;margin-top:4px}
-.compliance-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-.compliance-item{padding:14px;border-radius:10px;text-align:center;border:1px solid var(--border);background:var(--surface2)}
-.compliance-item .level{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
-.compliance-item .status{font-size:1.3rem;margin-bottom:2px}
-.compliance-item .desc{font-size:0.75rem;color:var(--text2)}
-.compliance-item.pass{border-color:rgba(76,218,138,0.3);background:rgba(76,218,138,0.08)}
-.compliance-item.fail{border-color:rgba(252,92,108,0.3);background:rgba(252,92,108,0.08)}
-.preview-box{border-radius:10px;padding:24px;margin-top:12px;min-height:120px;display:flex;flex-direction:column;justify-content:center;transition:all 0.3s}
-.preview-box .preview-large{font-size:1.5rem;font-weight:700;margin-bottom:8px}
-.preview-box .preview-normal{font-size:1rem;margin-bottom:4px}
-.preview-box .preview-small{font-size:0.85rem;opacity:0.85}
-.cb-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
-@media(min-width:640px){.cb-grid{grid-template-columns:1fr 1fr 1fr}}
-.cb-card{border-radius:10px;overflow:hidden;border:1px solid var(--border)}
-.cb-card .cb-header{padding:8px 12px;font-size:0.8rem;font-weight:600;background:var(--surface2);color:var(--text2);display:flex;justify-content:space-between;align-items:center}
-.cb-card .cb-preview{padding:16px;min-height:80px;display:flex;flex-direction:column;justify-content:center}
-.cb-card .cb-preview span{margin-bottom:2px}
-.palette-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
-@media(min-width:640px){.palette-grid{grid-template-columns:1fr 1fr}}
-.palette-item{border-radius:10px;overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:transform 0.2s}
-.palette-item:hover{transform:translateY(-2px)}
-.palette-preview{padding:20px;min-height:70px;display:flex;align-items:center;justify-content:center;font-weight:600}
-.palette-info{padding:10px 14px;background:var(--surface2);display:flex;justify-content:space-between;align-items:center;font-size:0.8rem}
-.palette-info .palette-colors{color:var(--text2)}
-.palette-info .palette-ratio{font-weight:600}
-.suggestions-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
-.suggestion-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:all 0.2s}
-.suggestion-item:hover{border-color:var(--accent);transform:translateY(-1px)}
-.suggestion-colors{display:flex;gap:6px;flex-shrink:0}
-.suggestion-swatch{width:32px;height:32px;border-radius:6px;border:1px solid rgba(255,255,255,0.1)}
-.suggestion-info{flex:1;min-width:0}
-.suggestion-info .suggestion-label{font-size:0.8rem;color:var(--text2);margin-bottom:2px}
-.suggestion-info .suggestion-ratio{font-weight:600;font-size:0.95rem}
-.recent-colors{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.recent-swatch{width:36px;height:36px;border-radius:8px;border:2px solid var(--border);cursor:pointer;transition:all 0.2s;position:relative}
-.recent-swatch:hover{transform:scale(1.15);border-color:var(--accent)}
-.recent-swatch .tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:0.7rem;white-space:nowrap;color:var(--text);z-index:10}
-.recent-swatch:hover .tooltip{display:block}
-.swap-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;font-size:1.2rem;flex-shrink:0;align-self:center}
-.swap-btn:hover{border-color:var(--accent);color:var(--accent);transform:rotate(180deg)}
-.colors-row{display:flex;gap:16px;align-items:flex-end}
-.colors-row .color-col{flex:1}
-.section-title{font-size:1.2rem;font-weight:700;margin:32px 0 16px;color:var(--text);display:flex;align-items:center;gap:8px}
-.section-title:first-child{margin-top:0}
-.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:0.7rem;font-weight:600}
-.badge-success{background:rgba(76,218,138,0.15);color:var(--success)}
-.badge-danger{background:rgba(252,92,108,0.15);color:var(--danger)}
-.badge-warn{background:rgba(252,180,76,0.15);color:var(--warn)}
-footer{text-align:center;padding:32px 16px;color:var(--text2);font-size:0.8rem;border-top:1px solid var(--border)}
-.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-24{margin-top:24px}
-.flex-between{display:flex;justify-content:space-between;align-items:center}
-.gap-12{gap:12px}.gap-8{gap:8px}
-.text-sm{font-size:0.85rem}.text-xs{font-size:0.75rem}
-.text-muted{color:var(--text2)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#eee;min-height:100vh;line-height:1.6}
+.c{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+h1{text-align:center;font-size:clamp(1.5rem,4vw,2.2rem);margin:24px 0 8px;background:linear-gradient(135deg,#e94560,#533483);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{text-align:center;color:#aab;margin-bottom:32px;font-size:.95rem}
+.card{background:#16213e;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.05)}
+.card h2{font-size:1.1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.cg label{display:block;font-size:.85rem;color:#aab;margin-bottom:6px;font-weight:500}
+.ci{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.25);border-radius:12px;padding:6px 12px;border:1px solid rgba(255,255,255,.08);transition:border-color .2s}
+.ci:focus-within{border-color:#e94560}
+.ci input[type=color]{width:40px;height:40px;border:none;background:none;cursor:pointer;border-radius:8px;padding:0}
+.ci input[type=color]::-webkit-color-swatch-wrapper{padding:2px}
+.ci input[type=color]::-webkit-color-swatch{border-radius:6px;border:2px solid rgba(255,255,255,.15)}
+.ci input[type=text]{flex:1;background:none;border:none;color:#eee;font-size:1.05rem;font-family:monospace;outline:none;text-transform:uppercase;letter-spacing:1px}
+.swap{display:flex;align-items:center;justify-content:center;margin:12px auto;width:44px;height:44px;border-radius:50%;background:#0f3460;border:1px solid rgba(255,255,255,.1);color:#eee;cursor:pointer;font-size:1.2rem;transition:all .2s}
+.swap:hover{background:#e94560;transform:rotate(180deg)}
+.rn{text-align:center;font-size:clamp(2.5rem,8vw,4rem);font-weight:800;letter-spacing:-1px;padding:16px 0 4px}
+.rl{text-align:center;color:#aab;font-size:.85rem;margin-bottom:12px}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.ri{background:rgba(0,0,0,.2);border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.05)}
+.ri .lb{font-size:.85rem;color:#aab}
+.ri .lb small{display:block;font-size:.75rem;opacity:.7}
+.b{padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:700;letter-spacing:.5px}
+.bp{background:rgba(46,213,115,.15);color:#2ed573;border:1px solid rgba(46,213,115,.3)}
+.bf{background:rgba(233,69,96,.15);color:#e94560;border:1px solid rgba(233,69,96,.3)}
+.pv{border-radius:12px;padding:24px;text-align:center;margin-top:8px;transition:all .3s}
+.pv .lg{font-size:1.5rem;font-weight:700;margin-bottom:6px}
+.pv .nm{font-size:1rem}
+.pv .sm{font-size:.75rem;margin-top:6px;opacity:.8}
+.sg{margin-top:8px}
+.si{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.2);border-radius:12px;padding:12px 16px;margin-top:8px;border:1px solid rgba(255,255,255,.05);cursor:pointer;transition:all .2s}
+.si:hover{border-color:#e94560;transform:translateX(4px)}
+.sw{width:36px;height:36px;border-radius:8px;border:2px solid rgba(255,255,255,.15);flex-shrink:0}
+.sn{flex:1;font-size:.85rem}
+.sn .hx{font-family:monospace;font-weight:600}
+.sn .ds{color:#aab;font-size:.78rem}
+.sb{font-size:.75rem;padding:3px 8px;border-radius:10px;background:rgba(46,213,115,.15);color:#2ed573;font-weight:600;white-space:nowrap}
+footer{text-align:center;color:#aab;font-size:.8rem;margin-top:40px;padding:20px 0;border-top:1px solid rgba(255,255,255,.05)}
+@media(max-width:560px){.row,.rg{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header>
-<h1>🎨 AI Color Contrast Checker</h1>
-<p>WCAG 2.1 Compliance · Color Blindness Simulation · AI Suggestions</p>
-</header>
-<main>
-<div class="grid" style="margin-bottom:20px">
+<div class="c">
+<h1>&#127912; Color Contrast Checker</h1>
+<p class="sub">WCAG 2.1 对比度检查 · 实时计算 · 智能建议</p>
 <div class="card">
-<h2>🎯 Color Input</h2>
-<div style="display:flex;flex-direction:column;gap:16px">
-<div>
-<label for="fg-hex">Foreground Color</label>
-<div class="color-input-group">
-<input type="color" id="fg-picker" value="#ffffff" aria-label="Foreground color picker">
-<div class="hex-input">
-<input type="text" id="fg-hex" value="#FFFFFF" maxlength="7" placeholder="#FFFFFF" aria-label="Foreground hex color">
+<h2>&#128396;&#65039; 选择颜色</h2>
+<div class="row">
+<div class="cg"><label for="fh">前景色 (文字)</label><div class="ci"><input type="color" id="fp" value="#ffffff"><input type="text" id="fh" value="#FFFFFF" maxlength="7" spellcheck="false"></div></div>
+<div class="cg"><label for="bh">背景色</label><div class="ci"><input type="color" id="bp" value="#1a1a2e"><input type="text" id="bh" value="#1A1A2E" maxlength="7" spellcheck="false"></div></div>
 </div>
+<button class="swap" id="sw" aria-label="交换颜色">&#8693;</button>
 </div>
-</div>
-<div>
-<label for="bg-hex">Background Color</label>
-<div class="color-input-group">
-<input type="color" id="bg-picker" value="#1a1a2e" aria-label="Background color picker">
-<div class="hex-input">
-<input type="text" id="bg-hex" value="#1A1A2E" maxlength="7" placeholder="#000000" aria-label="Background hex color">
-</div>
-</div>
-</div>
-<div style="display:flex;gap:8px;flex-wrap:wrap">
-<button class="btn btn-sm btn-outline" onclick="swapColors()" aria-label="Swap foreground and background colors">🔄 Swap</button>
-<button class="btn btn-sm btn-outline" onclick="randomColors()" aria-label="Generate random colors">🎲 Random</button>
-</div>
+<div class="card">
+<h2>&#128202; 对比度结果</h2>
+<div id="rn" class="rn">-</div>
+<div class="rl">对比度比率 (最低 1:1, 最高 21:1)</div>
+<div class="rg">
+<div class="ri"><div class="lb">AA 普通文本<small>≥ 4.5:1</small></div><span id="r1" class="b bf">FAIL</span></div>
+<div class="ri"><div class="lb">AA 大文本<small>≥ 3:1</small></div><span id="r2" class="b bf">FAIL</span></div>
+<div class="ri"><div class="lb">AAA 普通文本<small>≥ 7:1</small></div><span id="r3" class="b bf">FAIL</span></div>
+<div class="ri"><div class="lb">AAA 大文本<small>≥ 4.5:1</small></div><span id="r4" class="b bf">FAIL</span></div>
 </div>
 </div>
 <div class="card">
-<h2>📊 Contrast Ratio</h2>
-<div class="ratio-display">
-<div class="ratio-value" id="ratio-value">12.63</div>
-<div class="ratio-label">contrast ratio</div>
-</div>
-<div class="compliance-grid" id="compliance-grid">
-<div class="compliance-item pass" id="comp-aa-normal">
-<div class="level">AA Normal</div>
-<div class="status">✅</div>
-<div class="desc">≥ 4.5:1</div>
-</div>
-<div class="compliance-item pass" id="comp-aa-large">
-<div class="level">AA Large</div>
-<div class="status">✅</div>
-<div class="desc">≥ 3:1</div>
-</div>
-<div class="compliance-item pass" id="comp-aaa-normal">
-<div class="level">AAA Normal</div>
-<div class="status">✅</div>
-<div class="desc">≥ 7:1</div>
-</div>
-<div class="compliance-item pass" id="comp-aaa-large">
-<div class="level">AAA Large</div>
-<div class="status">✅</div>
-<div class="desc">≥ 4.5:1</div>
+<h2>&#128065;&#65039; 预览效果</h2>
+<div id="pv" class="pv">
+<div class="lg">大文本预览 Large Text</div>
+<div class="nm">普通文本预览 Normal body text for reading.</div>
+<div class="sm">小文本 Small text · 辅助信息</div>
 </div>
 </div>
+<div class="card" id="sgc" style="display:none">
+<h2>&#128161; 颜色建议</h2>
+<p style="font-size:.85rem;color:#aab;margin-bottom:8px">点击建议可直接应用</p>
+<div id="sgs" class="sg"></div>
 </div>
+<footer>Color Contrast Checker · WCAG 2.1 · Open Source Tool</footer>
 </div>
-
-<div class="card" style="margin-bottom:20px">
-<h2>👁️ Live Preview</h2>
-<div class="preview-box" id="preview-box">
-<div class="preview-large">Large Text (18pt+)</div>
-<div class="preview-normal">Normal body text looks like this. Check readability at different sizes.</div>
-<div class="preview-small">Small text and captions for fine print content.</div>
-</div>
-</div>
-
-<div class="card" style="margin-bottom:20px">
-<h2>🧠 AI Suggestions</h2>
-<p class="text-sm text-muted" style="margin-bottom:12px">Auto-adjusted colors to meet WCAG contrast targets</p>
-<div id="suggestions-container" class="grid" style="margin-bottom:0"></div>
-</div>
-
-<div class="card" style="margin-bottom:20px">
-<h2>👓 Color Blindness Simulation</h2>
-<p class="text-sm text-muted" style="margin-bottom:4px">Preview how your colors appear to people with color vision deficiencies</p>
-<div class="cb-grid" id="cb-grid"></div>
-</div>
-
-<div class="card" style="margin-bottom:20px">
-<h2>🎨 Accessible Palette Generator</h2>
-<p class="text-sm text-muted" style="margin-bottom:8px">WCAG-compliant color combinations based on your background</p>
-<div style="margin-bottom:12px">
-<button class="btn btn-primary btn-sm" onclick="generatePalette()" aria-label="Generate accessible color palette">Generate Palette</button>
-</div>
-<div class="palette-grid" id="palette-grid"></div>
-</div>
-
-<div class="card" style="margin-bottom:20px">
-<h2>🕐 Recent Colors</h2>
-<div id="recent-colors" style="display:flex;flex-wrap:wrap;gap:8px"></div>
-<div style="margin-top:12px">
-<button class="btn btn-sm btn-outline" onclick="clearRecent()" aria-label="Clear recent colors">Clear History</button>
-</div>
-</div>
-</main>
 <script>
-// ===== Utility Functions =====
-function hexToRgb(hex){
-  hex=hex.replace(/^#/,'');
-  if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-  const n=parseInt(hex,16);
-  return{r:(n>>16)&255,g:(n>>8)&255,b:n&255};
-}
-function rgbToHex(r,g,b){
-  return '#'+[r,g,b].map(x=>{
-    const h=Math.max(0,Math.min(255,Math.round(x))).toString(16);
-    return h.length===1?'0'+h:h;
-  }).join('');
-}
-function srgbToLinear(c){
-  c=c/255;
-  return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4);
-}
-function relativeLuminance(r,g,b){
-  return 0.2126*srgbToLinear(r)+0.7152*srgbToLinear(g)+0.0722*srgbToLinear(b);
-}
-function contrastRatio(fg,bg){
-  const l1=relativeLuminance(fg.r,fg.g,fg.b);
-  const l2=relativeLuminance(bg.r,bg.g,bg.b);
-  const lighter=Math.max(l1,l2);
-  const darker=Math.min(l1,l2);
-  return(lighter+0.05)/(darker+0.05);
-}
-function isValidHex(hex){
-  return/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(hex);
-}
-function hslToRgb(h,s,l){
-  h=h/360;s=s/100;l=l/100;
-  let r,g,b;
-  if(s===0){r=g=b=l;}else{
-    const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};
-    const q=l<0.5?l*(1+s):l+s-l*s;const p=2*l-q;
-    r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3);
-  }
-  return{r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)};
-}
-function rgbToHsl(r,g,b){
-  r/=255;g/=255;b/=255;
-  const max=Math.max(r,g,b),min=Math.min(r,g,b);
-  let h,s,l=(max+min)/2;
-  if(max===min){h=s=0;}else{
-    const d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);
-    switch(max){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break;}
-  }
-  return{h:Math.round(h*360),s:Math.round(s*100),l:Math.round(l*100)};
-}
-
-// ===== Color Blindness Simulation =====
-function simulateColorBlindness(rgb,type){
-  const r=rgb.r/255,g=rgb.g/255,b=rgb.b/255;
-  let nr,ng,nb;
-  switch(type){
-    case'protanopia':
-      nr=0.567*r+0.433*g+0*b;ng=0.558*r+0.442*g+0*b;nb=0*r+0.242*g+0.758*b;break;
-    case'deuteranopia':
-      nr=0.625*r+0.375*g+0*b;ng=0.7*r+0.3*g+0*b;nb=0*r+0.3*g+0.7*b;break;
-    case'tritanopia':
-      nr=0.95*r+0.05*g+0*b;ng=0*r+0.433*g+0.567*b;nb=0*r+0.475*g+0.525*b;break;
-    default:nr=r;ng=g;nb=b;
-  }
-  return{r:Math.round(Math.min(1,Math.max(0,nr))*255),g:Math.round(Math.min(1,Math.max(0,ng))*255),b:Math.round(Math.min(1,Math.max(0,nb))*255)};
-}
-
-// ===== AI Color Suggestions =====
-function adjustColorForContrast(fgRgb,bgRgb,targetRatio){
-  const bgLum=relativeLuminance(bgRgb.r,bgRgb.g,bgRgb.b);
-  const fgHsl=rgbToHsl(fgRgb.r,fgRgb.g,fgRgb.b);
-  // Try lighter
-  let bestLight=null,bestDark=null;
-  for(let l=100;l>=0;l--){
-    const rgb=hslToRgb(fgHsl.h,fgHsl.s,l);
-    const lum=relativeLuminance(rgb.r,rgb.g,rgb.b);
-    const ratio=lum>bgLum?(lum+0.05)/(bgLum+0.05):(bgLum+0.05)/(lum+0.05);
-    if(ratio>=targetRatio){
-      if(l>=50&&!bestLight)bestLight=rgb;
-      if(l<50&&!bestDark)bestDark=rgb;
-      if(bestLight&&bestDark)break;
-    }
-  }
-  const results=[];
-  if(bestLight)results.push(bestLight);
-  if(bestDark)results.push(bestDark);
-  // Also try adjusting background
-  const bgHsl=rgbToHsl(bgRgb.r,bgRgb.g,bgRgb.b);
-  const fgLum=relativeLuminance(fgRgb.r,fgRgb.g,fgRgb.b);
-  for(let l=0;l<=100;l++){
-    const rgb=hslToRgb(bgHsl.h,bgHsl.s,l);
-    const lum=relativeLuminance(rgb.r,rgb.g,rgb.b);
-    const ratio=fgLum>lum?(fgLum+0.05)/(lum+0.05):(lum+0.05)/(fgLum+0.05);
-    if(ratio>=targetRatio){results.push({bg:rgb,fg:fgRgb});break;}
-  }
-  return results;
-}
-
-// ===== Palette Generation =====
-function generateAccessiblePalette(bgRgb){
-  const bgLum=relativeLuminance(bgRgb.r,bgRgb.g,bgRgb.b);
-  const palette=[];
-  const hues=[0,30,60,120,180,210,240,270,300,330];
-  const saturations=[70,85,60];
-  for(const hue of hues){
-    for(const sat of saturations){
-      for(let l=10;l<=95;l+=5){
-        const rgb=hslToRgb(hue,sat,l);
-        const lum=relativeLuminance(rgb.r,rgb.g,rgb.b);
-        const ratio=lum>bgLum?(lum+0.05)/(bgLum+0.05):(bgLum+0.05)/(lum+0.05);
-        if(ratio>=4.5){
-          palette.push({fg:rgb,ratio:ratio,hue:hue});
-          break;
-        }
-      }
-      if(palette.length>=8)break;
-    }
-    if(palette.length>=8)break;
-  }
-  return palette.slice(0,8);
-}
-
-// ===== localStorage =====
-function getRecentColors(){
-  try{return JSON.parse(localStorage.getItem('recentColors')||'[]');}catch(e){return[];}
-}
-function saveRecentColor(fg,bg){
-  let recent=getRecentColors();
-  const entry={fg:fg,bg:bg,time:Date.now()};
-  recent=recent.filter(r=>!(r.fg===fg&&r.bg===bg));
-  recent.unshift(entry);
-  if(recent.length>20)recent=recent.slice(0,20);
-  try{localStorage.setItem('recentColors',JSON.stringify(recent));}catch(e){}
-  renderRecentColors();
-}
-function clearRecent(){
-  try{localStorage.removeItem('recentColors');}catch(e){}
-  renderRecentColors();
-}
-function renderRecentColors(){
-  const container=document.getElementById('recent-colors');
-  const recent=getRecentColors();
-  if(recent.length===0){container.innerHTML='<span class="text-sm text-muted">No recent colors yet</span>';return;}
-  container.innerHTML=recent.map((r,i)=>
-    '<button class="recent-swatch" onclick="applyRecent('+i+')" title="FG: '+r.fg+' / BG: '+r.bg+'" aria-label="Apply recent color pair '+r.fg+' on '+r.bg+'" style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;background:none;padding:0;width:56px;height:32px">'
-    +'<span style="flex:1;background:'+r.fg+'"></span>'
-    +'<span style="flex:1;background:'+r.bg+'"></span>'
-    +'</button>'
-  ).join('');
-}
-function applyRecent(i){
-  const recent=getRecentColors();
-  if(recent[i]){
-    document.getElementById('fg-hex').value=recent[i].fg;
-    document.getElementById('bg-hex').value=recent[i].bg;
-    document.getElementById('fg-picker').value=recent[i].fg;
-    document.getElementById('bg-picker').value=recent[i].bg;
-    updateAll();
-  }
-}
-
-// ===== UI Update Functions =====
-function updateCompliance(ratio){
-  const checks=[
-    {id:'comp-aa-normal',threshold:4.5},
-    {id:'comp-aa-large',threshold:3},
-    {id:'comp-aaa-normal',threshold:7},
-    {id:'comp-aaa-large',threshold:4.5}
-  ];
-  checks.forEach(c=>{
-    const el=document.getElementById(c.id);
-    const pass=ratio>=c.threshold;
-    el.className='compliance-item '+(pass?'pass':'fail');
-    el.querySelector('.status').textContent=pass?'✅':'❌';
-  });
-}
-
-function updatePreview(fgHex,bgHex){
-  const box=document.getElementById('preview-box');
-  box.style.backgroundColor=bgHex;
-  box.style.color=fgHex;
-  box.style.border='1px solid var(--border)';
-}
-
-function updateColorBlindness(fgRgb,bgRgb,fgHex,bgHex){
-  const types=[
-    {key:'protanopia',name:'Protanopia',desc:'Red-blind'},
-    {key:'deuteranopia',name:'Deuteranopia',desc:'Green-blind'},
-    {key:'tritanopia',name:'Tritanopia',desc:'Blue-blind'}
-  ];
-  const grid=document.getElementById('cb-grid');
-  grid.innerHTML=types.map(t=>{
-    const simFg=simulateColorBlindness(fgRgb,t.key);
-    const simBg=simulateColorBlindness(bgRgb,t.key);
-    const simFgHex=rgbToHex(simFg.r,simFg.g,simFg.b);
-    const simBgHex=rgbToHex(simBg.r,simBg.g,simBg.b);
-    const simRatio=contrastRatio(simFg,simBg);
-    return '<div class="cb-card">'
-      +'<div class="cb-header"><span>'+t.name+'</span><span>'+simRatio.toFixed(2)+':1</span></div>'
-      +'<div class="cb-preview" style="background:'+simBgHex+';color:'+simFgHex+'">'
-      +'<span style="font-size:1.1rem;font-weight:700">'+t.desc+'</span>'
-      +'<span style="font-size:0.85rem">Sample text preview</span>'
-      +'</div></div>';
-  }).join('');
-}
-
-function updateSuggestions(fgRgb,bgRgb){
-  const container=document.getElementById('suggestions-container');
-  const ratio=contrastRatio(fgRgb,bgRgb);
-  const targets=[
-    {name:'AA Normal',ratio:4.5},
-    {name:'AA Large',ratio:3},
-    {name:'AAA Normal',ratio:7},
-    {name:'AAA Large',ratio:4.5}
-  ];
-  let html='';
-  if(ratio>=7){
-    html='<div class="text-sm" style="color:var(--success);padding:12px">✅ Your colors already meet all WCAG standards!</div>';
-  }else{
-    const suggestions=[];
-    targets.forEach(t=>{
-      if(ratio<t.ratio){
-        const results=adjustColorForContrast(fgRgb,bgRgb,t.ratio);
-        results.forEach(r=>{
-          if(r.bg){
-            const newBgHex=rgbToHex(r.bg.r,r.bg.g,r.bg.b);
-            const fgHex=rgbToHex(r.fg.r,r.fg.g,r.fg.b);
-            const newRatio=contrastRatio(r.fg,r.bg);
-            suggestions.push({fgHex:fgHex,bgHex:newBgHex,ratio:newRatio,label:t.name+' (adjust BG)'});
-          }else{
-            const newFgHex=rgbToHex(r.r,r.g,r.b);
-            const bgHex=rgbToHex(bgRgb.r,bgRgb.g,bgRgb.b);
-            const newRatio=contrastRatio(r,bgRgb);
-            suggestions.push({fgHex:newFgHex,bgHex:bgHex,ratio:newRatio,label:t.name+' (adjust FG)'});
-          }
-        });
-      }
-    });
-    // Deduplicate
-    const seen=new Set();
-    const unique=suggestions.filter(s=>{
-      const key=s.fgHex+s.bgHex;
-      if(seen.has(key))return false;
-      seen.add(key);return true;
-    }).slice(0,6);
-    html=unique.map(s=>
-      '<div class="card" style="padding:14px;cursor:pointer;margin:0" onclick="applySuggestion(\''+s.fgHex+'\',\''+s.bgHex+'\')">'
-      +'<div style="font-size:0.75rem;color:var(--text2);margin-bottom:6px">'+s.label+'</div>'
-      +'<div style="border-radius:8px;padding:12px;background:'+s.bgHex+';color:'+s.fgHex+';font-weight:600;font-size:0.9rem;margin-bottom:6px">Sample Text</div>'
-      +'<div style="display:flex;justify-content:space-between;font-size:0.75rem">'
-      +'<span class="text-muted">'+s.fgHex+' / '+s.bgHex+'</span>'
-      +'<span style="color:var(--success)">'+s.ratio.toFixed(2)+':1</span>'
-      +'</div></div>'
-    ).join('');
-    if(unique.length===0)html='<div class="text-sm text-muted" style="padding:12px">No suggestions needed - colors are compliant.</div>';
-  }
-  container.innerHTML=html;
-}
-function applySuggestion(fg,bg){
-  document.getElementById('fg-hex').value=fg;
-  document.getElementById('bg-hex').value=bg;
-  document.getElementById('fg-picker').value=fg;
-  document.getElementById('bg-picker').value=bg;
-  updateAll();
-}
-
-function generatePalette(){
-  const bgHex=document.getElementById('bg-hex').value;
-  if(!isValidHex(bgHex))return;
-  const bgRgb=hexToRgb(bgHex);
-  const palette=generateAccessiblePalette(bgRgb);
-  const grid=document.getElementById('palette-grid');
-  if(palette.length===0){grid.innerHTML='<div class="text-sm text-muted">No accessible colors found for this background.</div>';return;}
-  grid.innerHTML=palette.map(p=>{
-    const fgHex=rgbToHex(p.fg.r,p.fg.g,p.fg.b);
-    return '<div class="palette-item" onclick="applySuggestion(\''+fgHex+'\',\''+bgHex+'\')">'
-      +'<div class="palette-preview" style="background:'+bgHex+';color:'+fgHex+'">The quick brown fox</div>'
-      +'<div class="palette-info"><span class="palette-colors">'+fgHex+' on '+bgHex+'</span>'
-      +'<span class="palette-ratio" style="color:var(--success)">'+p.ratio.toFixed(1)+':1</span></div></div>';
-  }).join('');
-}
-
-function swapColors(){
-  const fgHex=document.getElementById('fg-hex').value;
-  const bgHex=document.getElementById('bg-hex').value;
-  document.getElementById('fg-hex').value=bgHex;
-  document.getElementById('bg-hex').value=fgHex;
-  document.getElementById('fg-picker').value=bgHex.length===4?bgHex:bgHex;
-  document.getElementById('bg-picker').value=fgHex.length===4?fgHex:fgHex;
-  updateAll();
-}
-
-function randomColors(){
-  const randHex=()=>'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
-  let fg,bg,ratio;
-  do{fg=randHex();bg=randHex();ratio=contrastRatio(hexToRgb(fg),hexToRgb(bg));}while(ratio<3&&ratio>0);
-  document.getElementById('fg-hex').value=fg.toUpperCase();
-  document.getElementById('bg-hex').value=bg.toUpperCase();
-  document.getElementById('fg-picker').value=fg;
-  document.getElementById('bg-picker').value=bg;
-  updateAll();
-}
-
-function updateAll(){
-  const fgHex=document.getElementById('fg-hex').value;
-  const bgHex=document.getElementById('bg-hex').value;
-  if(!isValidHex(fgHex)||!isValidHex(bgHex))return;
-  const fgRgb=hexToRgb(fgHex);
-  const bgRgb=hexToRgb(bgHex);
-  const ratio=contrastRatio(fgRgb,bgRgb);
-  document.getElementById('ratio-value').textContent=ratio.toFixed(2)+':1';
-  updateCompliance(ratio);
-  updatePreview(fgHex,bgHex);
-  updateColorBlindness(fgRgb,bgRgb,fgHex,bgHex);
-  updateSuggestions(fgRgb,bgRgb);
-  saveRecentColor(fgHex.toUpperCase(),bgHex.toUpperCase());
-}
-
-// ===== Event Handlers =====
-document.getElementById('fg-picker').addEventListener('input',function(){
-  document.getElementById('fg-hex').value=this.value.toUpperCase();
-  updateAll();
-});
-document.getElementById('bg-picker').addEventListener('input',function(){
-  document.getElementById('bg-hex').value=this.value.toUpperCase();
-  updateAll();
-});
-document.getElementById('fg-hex').addEventListener('input',function(){
-  let v=this.value;
-  if(v.length>0&&v[0]!=='#')v='#'+v;
-  this.value=v.toUpperCase();
-  if(isValidHex(v)){document.getElementById('fg-picker').value=v;updateAll();}
-});
-document.getElementById('bg-hex').addEventListener('input',function(){
-  let v=this.value;
-  if(v.length>0&&v[0]!=='#')v='#'+v;
-  this.value=v.toUpperCase();
-  if(isValidHex(v)){document.getElementById('bg-picker').value=v;updateAll();}
-});
-
-// ===== Init =====
-renderRecentColors();
-updateAll();
-generatePalette();
+const $=s=>document.getElementById(s),hex2rgb=h=>{const r=parseInt(h.slice(1),16);return[(r>>16)&255,(r>>8)&255,r&255]},rgb2hex=([r,g,b])=>'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join(''),luminance=([r,g,b])=>{const a=[r,g,b].map(v=>{v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*a[0]+.7152*a[1]+.0722*a[2]},contrast=(fg,bg)=>{const l1=luminance(fg),l2=luminance(bg);return(Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05)},isValid=h=>/^#[0-9a-f]{6}$/i.test(h);
+function hsl2rgb(h,s,l){let r,g,b;if(s===0){r=g=b=l}else{const q=l<.5?l*(1+s):l+s-l*s,p=2*l-q;const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p};r=hue2rgb(p,q,h/360);g=hue2rgb(p,q,(h+120)/360>1?(h+120)/360-1:(h+120)/360);b=hue2rgb(p,q,(h+240)/360>1?(h+240)/360-1:(h+240)/360)}return[Math.round(r*255),Math.round(g*255),Math.round(b*255)]}
+function rgb2hsl([r,g,b]){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let h=0,s=0;if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=((g-b)/d+(g<b?6:0))*60;break;case g:h=((b-r)/d+2)*60;break;case b:h=((r-g)/d+4)*60;break}}return[h,s,l]}
+function adjustColor(rgb,bgRgb,targetRatio,isFg){const [h,s,l]=rgb2hsl(rgb);const bgL=luminance(bgRgb);let lo=0,hi=1,best=rgb,bestR=contrast(rgb,bgRgb);for(let i=0;i<50;i++){const mid=(lo+hi)/2;const test=hsl2rgb(h,s,mid);const r=isFg?contrast(test,bgRgb):contrast(bgRgb,test);if(r>=targetRatio&&r<bestR){best=test;bestR=r}const testL=luminance(test);const cr=isFg?((Math.max(testL,bgL)+.05)/(Math.min(testL,bgL)+.05)):((Math.max(testL,bgL)+.05)/(Math.min(testL,bgL)+.05));if(cr<targetRatio){if(bgL>.5)hi=mid;else lo=mid}else{if(bgL>.5)lo=mid;else hi=mid}}if(bestR<targetRatio){lo=0;hi=1;for(let i=0;i<50;i++){const mid=(lo+hi)/2;const test=hsl2rgb(h,s,mid);const r=isFg?contrast(test,bgRgb):contrast(bgRgb,test);if(r>=targetRatio){best=test;bestR=r;if(bgL>.5)lo=mid;else hi=mid}else{if(bgL>.5)hi=mid;else lo=mid}}}return bestR>=targetRatio?best:null}
+function getSuggestions(fgRgb,bgRgb,ratio){const suggestions=[];const targets=[{r:4.5,label:'AA 普通文本'},{r:7,label:'AAA 普通文本'}];for(const t of targets){if(ratio>=t.r)continue;const adjFg=adjustColor(fgRgb,bgRgb,t.r,true);if(adjFg){const cr=contrast(adjFg,bgRgb);suggestions.push({hex:rgb2hex(adjFg),ratio:cr,label:'调整前景色达到 '+t.label,type:'fg',rgb:adjFg})}const adjBg=adjustColor(bgRgb,fgRgb,t.r,false);if(adjBg){const cr=contrast(fgRgb,adjBg);suggestions.push({hex:rgb2hex(adjBg),ratio:cr,label:'调整背景色达到 '+t.label,type:'bg',rgb:adjBg})}}return suggestions}
+function update(){const fv=$('fh').value.trim(),bv=$('bh').value.trim();if(!isValid(fv)||!isValid(bv))return;const fg=hex2rgb(fv),bg=hex2rgb(bv),r=contrast(fg,bg);$('fp').value=fv.toLowerCase();$('bp').value=bv.toLowerCase();$('rn').textContent=r.toFixed(2)+' : 1';$('rn').style.color=r>=4.5?'#2ed573':r>=3?'#ffa502':'#e94560';
+const tests=[[r>=4.5,'r1'],[r>=3,'r2'],[r>=7,'r3'],[r>=4.5,'r4']];tests.forEach(([pass,id])=>{const el=$(id);el.textContent=pass?'PASS':'FAIL';el.className='b '+(pass?'bp':'bf')});
+const pv=$('pv');pv.style.backgroundColor=bv;pv.style.color=fv;
+const sgs=getSuggestions(fg,bg,r),sgc=$('sgc'),sgd=$('sgs');if(sgs.length>0){sgc.style.display='';sgd.innerHTML='';sgs.forEach(s=>{const d=document.createElement('div');d.className='si';d.innerHTML='<div class="sw" style="background:'+s.hex+'"></div><div class="sn"><span class="hx">'+s.hex.toUpperCase()+'</span><div class="ds">'+s.label+'</div></div><span class="sb">'+s.ratio.toFixed(2)+':1</span>';d.onclick=()=>{if(s.type==='fg'){$('fh').value=s.hex.toUpperCase();$('fp').value=s.hex}else{$('bh').value=s.hex.toUpperCase();$('bp').value=s.hex}update()};sgd.appendChild(d)})}else{sgc.style.display='none'}}
+['fh','bh'].forEach(id=>{$(id).addEventListener('input',function(){let v=this.value;if(v[0]!=='#')v='#'+v;if(isValid(v))update()})});
+['fp','bp'].forEach((id,i)=>{$(id).addEventListener('input',function(){const hex=this.value;const tid=i===0?'fh':'bh';$(tid).value=hex.toUpperCase();update()})});
+$('sw').onclick=()=>{const f=$('fh').value,b=$('bh').value;$('fh').value=b;$('bh').value=f;update()};
+update();
 </script>
-<script src="monetize.js"></script>
+<script src="https://alwingulla.com/88/tag.min.js" data-zone="130647" async data-cfasync="false"></script>
 </body>
 </html>
